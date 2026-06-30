@@ -12,7 +12,7 @@ You do not need a formal machine learning background. Move module by module. Do 
 
 ### Skills You Should Already Have
 
-- Basic Python: functions, classes, lists, dictionaries, virtual environments.
+- Basic Python: functions, classes, lists, dictionaries, `uv` package manager.
 - Basic terminal usage: running scripts, installing packages, reading errors.
 - Comfortable editing `.py` and `.md` files.
 
@@ -21,27 +21,26 @@ You do not need a formal machine learning background. Move module by module. Do 
 From this repository folder:
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
+uv init
+uv sync
 ```
 
 Install the beginner set:
 
 ```powershell
-pip install numpy scipy soundfile librosa matplotlib noisereduce webrtcvad jiwer
+uv add numpy scipy soundfile librosa matplotlib noisereduce webrtcvad jiwer
 ```
 
 Install ASR tools later in Module 3:
 
 ```powershell
-pip install faster-whisper
+uv add faster-whisper
 ```
 
 Install transcript repair tools later in Module 4:
 
 ```powershell
-pip install transformers torch accelerate sentencepiece
+uv add transformers torch accelerate sentencepiece
 ```
 
 ### Suggested Repository Structure
