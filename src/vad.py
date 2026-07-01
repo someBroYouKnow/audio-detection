@@ -7,19 +7,22 @@ import numpy as np
 import soundfile as sf
 import webrtcvad
 
+from debug_utils import debug_value
+
 TARGET_SR = 16000
 
 
 def load_audio(path):
     data, sample_rate = sf.read(path)
-    print("What load_audio found: ", data, sample_rate)
+    debug_value("raw_audio", data)
+    debug_value("original_sample_rate", sample_rate)
     if data.ndim > 1:
         data = np.mean(data, axis=1)
     if sample_rate != TARGET_SR:
         data = librosa.resample(
             data.astype(np.float32), orig_sr=sample_rate, target_sr=TARGET_SR
         )
-        print("Printed data after librosa ", data)
+        debug_value("resampled_audio", data)
         sample_rate = TARGET_SR
     return data.astype(np.float32), sample_rate
 
@@ -31,13 +34,14 @@ def float_to_pcm16(audio):
 
 def detect_speech(path, aggressiveness=3, frame_ms=30):
     audio, sample_rate = load_audio(path)
-    print("return of detect_speech", audio, sample_rate)
+    debug_value("audio", audio)
+    debug_value("sample_rate", sample_rate)
     cleaned = nr.reduce_noise(y=audio, sr=sample_rate, prop_decrease=0.85)
-    print("noise reduce: ", cleaned)
+    debug_value("cleaned_audio", cleaned)
     pcm = float_to_pcm16(cleaned)
-    print("pcm 16 : ", pcm)
+    debug_value("pcm16_audio", pcm)
     vad = webrtcvad.Vad(aggressiveness)
-    print("vad output: ", vad)
+    debug_value("vad", vad)
 
 
 if __name__ == "__main__":
