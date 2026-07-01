@@ -32,6 +32,13 @@ def float_to_pcm16(audio):
     return (audio * 32767).astype(np.int16).tobytes()
 
 
+def frame_bytes(pcm_bytes, sample_rate, frame_ms=30):
+    bytes_per_sample = 2
+    frame_size = int(sample_rate * frame_ms / 1000) * bytes_per_sample
+    for offset in range(0, len(pcm_bytes) - frame_size + 1, frame_size):
+        yield offset, pcm_bytes[offset : offset + frame_size]
+
+
 def detect_speech(path, aggressiveness=3, frame_ms=30):
     audio, sample_rate = load_audio(path)
     debug_value("audio", audio)
@@ -42,6 +49,34 @@ def detect_speech(path, aggressiveness=3, frame_ms=30):
     debug_value("pcm16_audio", pcm)
     vad = webrtcvad.Vad(aggressiveness)
     debug_value("vad", vad)
+
+    segments = []
+    active_start = None
+    bytes_per_second = sample_rate * 2
+
+    for offset, frame in frame_bytes(pcm, sample_rate, frame_ms):
+        start_time = offset / bytes_per_second
+        end_time = start_time + frame_ms / 1000
+        is_speech = vad.is_speech(frame, sample_rate)
+
+        if is_speech and active_start is None:
+            active_start = start_time
+        elif not is_speech and active_start is not None:
+            segments.append(
+                {"start": round(active_start, 3), "end": round(end_time, 3)}
+            )
+            active_start = None
+
+    if active_start is not None:
+        segments.append(
+            {"start": round(active_start, 3), "end": round(len(audio) / sample_rate, 3)}
+        )
+
+    return {
+        "audio_file": Path(path).name,
+        "sample_rate": sample_rate,
+        "segments": segments,
+    }
 
 
 if __name__ == "__main__":
