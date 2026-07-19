@@ -24,6 +24,7 @@ dependencies = [
     "transformers>=5.12.1",
     "webrtcvad>=2.0.10",
     "torchcodec>=0.14.0",
+    "tensorboard>=2.21.0",
 ]
  
 
